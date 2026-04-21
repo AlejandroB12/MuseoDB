@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil del Autor | MUSEO CONTEMPORANEO</title>
+    <link rel="stylesheet" href="Estilos/Estilo-inicio.css">
+    <style>
+        body { padding-top: 100px; background: #050505; color: white; }
+
+        /* --- SECCIÓN PERFIL SUPERIOR --- */
+        .author-profile-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 50px;
+            width: 84%;
+            margin: 0 auto 40px;
+            padding: 40px;
+            background: #0a0a0a;
+            border: 1px solid #111;
+            border-radius: 4px;
+        }
+
+        .author-frame {
+            flex: 0 0 300px;
+            height: 300px;
+            border: 1px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between; /* Empuja el logo a la izquierda y el contenedor a la derecha */
+            align-items: center;
+            width: 100%;
+            padding: 0 5%;
+            box-sizing: border-box;
+        }
+
+                /* 2. Este es el contenedor que debe expandirse */
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; /* Mueve todo el contenido hacia la derecha */
+            flex-grow: 1; /* ¡IMPORTANTE! Esto obliga al contenedor a tomar todo el espacio a la derecha */
+            gap: 40px;    /* Espacio entre los links y el usuario */
+        }
+
+        /* Estilo para que el bloque de usuario no rompa el diseño */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px; 
+            white-space: nowrap; /* Evita que los elementos se amontonen en varias líneas */
+        }
+
+       /* 3. Asegurar que los links tengan espacio */
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* El bloque de usuario se mantendrá a la derecha automáticamente */
+        .auth-buttons, .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Ajuste para pantallas pequeñas */
+        @media (max-width: 1024px) {
+            .nav-links { gap: 15px; }
+            .navbar { padding: 0 2%; }
+        }
+
+        .author-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+       .author-details { 
+        flex: 1; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center; /* Centra verticalmente respecto a la imagen */
+        text-align: left;        /* Mantiene el texto alineado a la izquierda, que es más legible */
+        padding-left: 20px;      
+    }
+
+        /* Opcional: Si quieres que el texto esté centrado horizontalmente dentro de su área */
+        .author-details h1, .author-details .bio, .author-meta {
+            text-align: left; /* O cambia a 'center' si prefieres centrado */
+        }
+
+        .author-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .type-tag {
+            background: #111;
+            color: #00ff00;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 2px;
+            border: 1px solid #222;
+            text-transform: uppercase;
+        }
+
+        .author-details .bio {
+            color: #ccc;
+            line-height: 1.6;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .badge-nacionalidad {
+            display: inline-block;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 5px 15px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        /* --- SEPARADOR Y TÍTULO --- */
+        .separator {
+            width: 84%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #00ff00, transparent);
+            margin: 50px auto;
+        }
+
+        .section-title {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            color: #00ff00;
+            margin-bottom: 30px;
+        }
+
+        .filter-date-container {
+            background: #0a0a0a;
+            padding: 30px;
+            border: 1px solid #111;
+            width: 84%;
+            margin: 0 auto 50px;
+            display: flex;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        select {
+            background: #111;
+            border: 1px solid #333;
+            color: white;
+            padding: 10px 12.5px;
+            outline: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* --- CORRECCIÓN CRÍTICA: GALERÍA Y TARJETAS --- */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 0 8% 100px;
+        }
+
+        /* Forzamos dimensiones para que la imagen sea visible */
+        .art-img {
+            width: 100%;
+            height: 300px; 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #111;
+            cursor: zoom-in; /* Indicador visual de que es clickeable */
+        }
+
+        @media (max-width: 768px) {
+            .author-profile-container { flex-direction: column; text-align: center; }
+            .author-meta { justify-content: center; }
+        }
+
+        /* --- ESTILOS DE LA MODAL --- */
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 10000;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-contenido {
+            display: flex;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            width: 90%;
+            max-width: 1100px;
+            height: 80vh;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #modal-imagen { width: 65%; object-fit: contain; background: #000; }
+
+        .modal-info-panel {
+            width: 35%;
+            padding: 40px;
+            overflow-y: auto;
+            border-left: 1px solid #222;
+        }
+
+        .cerrar-modal {
+            position: absolute;
+            top: 20px; right: 30px;
+            font-size: 2.5rem;
+            color: #00ff00;
+            cursor: pointer;
+            z-index: 10001;
+        }
+
+        /* Efecto para desenfocar el fondo */
+        body.modal-active #main-wrapper {
+            filter: blur(15px);
+            pointer-events: none;
+            transition: filter 0.4s ease;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="main-wrapper"> <nav class="navbar">
+            <a href="../Contenido/Inicio.html" class="logo" style="text-decoration:none; font-weight:bold; letter-spacing:2px;"> ARTE CONTEMPORANEO</a>
+            
+            <div class="nav-container">
+                <ul class="nav-links">
+                    <li><a href="Obras.html">Catálogo</a></li>
+                    <li><a href="Artistas.html">Artistas</a></li>
+                </ul>
+
+                <div class="auth-buttons" id="auth-buttons">
+                    <a href="../Inicio_sesion/Login.html" class="btn-login" style="color:white; text-decoration:none; font-size:0.75rem;">INICIAR SESION</a>
+                    <a href="../Inicio_sesion/Registro.html" class="btn-register" style="border:1px solid #00ff00; color:#00ff00; padding:8px 15px; text-decoration:none; font-size:0.75rem;">REGISTRARTE</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="author-profile-container">
+            <div class="author-frame">
+                <img id="authImg" src="placeholder.jpg" alt="Autor">
+            </div>
+            <div class="author-details">
+                <span id="authNation" class="badge-nacionalidad">Nacionalidad</span>
+                <h1 id="authName">Nombre del Autor</h1>
+                
+                <div class="author-meta">
+                    <p id="authBirth" style="color: #666; font-size: 0.8rem; margin: 0;"></p>
+                    <div id="authTypes" style="display: flex; gap: 5px;"></div>
+                </div>
+
+                <div id="authBio" class="bio">
+                    Cargando biografía del artista...
+                </div>
+            </div>
+        </div>
+
+        <div class="separator"></div>
+
+        <h2 class="section-title">Obras</h2>
+
+        <div class="filter-date-container">
+            <div class="filter-group">
+                <label>Filtrar </label>
+                <select id="sortDate">
+                    <option value="desc">Más Recientes</option>
+                    <option value="asc">Más Antiguas</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="gallery-grid" id="authorGallery"></div>
+    </div>
+
+    <div id="obra-modal" class="modal">
+        <span class="cerrar-modal" onclick="cerrarModal()">&times;</span>
+        <div class="modal-contenido">
+            <img id="modal-imagen" src="" alt="Obra expandida">
+            <div class="modal-info-panel">
+                <h2 id="modal-titulo"></h2>
+                <p id="modal-artista" style="color: #00ff00; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px;"></p>
+                <hr style="border-color: #222; margin: 20px 0;">
+                <div id="modal-detalles-tecnicos" style="line-height: 1.8; color: #ccc; font-size: 0.9rem;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('obra-modal');
+
+        function abrirModal(img, titulo, artista, detalles) {
+            document.getElementById('modal-imagen').src = img;
+            document.getElementById('modal-titulo').innerText = titulo;
+            document.getElementById('modal-artista').innerText = `Por ${artista}`;
+            document.getElementById('modal-detalles-tecnicos').innerHTML = detalles;
+            
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-active');
+        }
+
+        function cerrarModal() {
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-active');
+        }
+
+        window.onclick = (event) => { if (event.target == modal) cerrarModal(); }
+
+        const params = new URLSearchParams(window.location.search);
+        const idAutor = params.get('id');
+
+        async function cargarPerfil() {
+            if (!idAutor) return;
+
+            const ordenDate = document.getElementById('sortDate').value;
+            
+            try {
+                const resp = await fetch(`/api/autor-detalle/${idAutor}?ordenDate=${ordenDate}`);
+                const data = await resp.json();
+
+                let nombreAutor = "Artista Desconocido";
+
+                if (data.autor) {
+                    nombreAutor = `${data.autor.Nombre} ${data.autor.Apellido}`;
+                    document.getElementById('authName').textContent = nombreAutor;
+                    document.getElementById('authNation').textContent = data.autor.Nacionalidad;
+                    
+                    if (data.autor.Fecha_nacimiento) {
+                        const fecha = new Date(data.autor.Fecha_nacimiento);
+                        document.getElementById('authBirth').textContent = `Nacimiento: ${fecha.toLocaleDateString()}`;
+                    }
+                    
+                    document.getElementById('authBio').textContent = data.autor.Biografia || "Sin biografía disponible.";
+                    
+                    if(data.autor.Fotografia) {
+                        document.getElementById('authImg').src = `data:image/jpeg;base64,${data.autor.Fotografia}`;
+                    }
+                }
+
+                const typesContainer = document.getElementById('authTypes');
+                typesContainer.innerHTML = '';
+                
+                if (data.obras && data.obras.length > 0) {
+                    const generosUnicos = [...new Set(data.obras.map(o => o.GeneroNombre))].filter(g => g);
+                    
+                    generosUnicos.forEach(genero => {
+                        const span = document.createElement('span');
+                        span.className = 'type-tag';
+                        span.textContent = genero;
+                        typesContainer.appendChild(span);
+                    });
+
+                    const gallery = document.getElementById('authorGallery');
+                    gallery.innerHTML = '';
+                    
+                    data.obras.forEach(obra => {
+                        const base64Img = obra.imagen ? obra.imagen.replace(/\s/g, '') : null;
+                        const imgPath = base64Img ? `data:image/jpeg;base64,${base64Img}` : 'placeholder.jpg';
+                        
+                        // Preparar ficha técnica para la modal
+                        const fichaTecnica = `
+                            <p><strong>GÉNERO:</strong> ${obra.GeneroNombre || 'N/A'}</p>
+                            <p><strong>AÑO:</strong> ${new Date(obra.Fecha_creacion).getFullYear()}</p>
+                            <p><strong>TÉCNICA:</strong> ${obra.Tecnica || 'No especificada'}</p>
+                        `;
+
+                        const card = document.createElement('div');
+                        card.className = 'art-card';
+                        card.innerHTML = `
+                            <div class="art-img" 
+                                 style="background-image: url('${imgPath}')" 
+                                 onclick="abrirModal('${imgPath}', '${obra.Nombre}', '${nombreAutor}', \`${fichaTecnica}\`)">
+                            </div>
+                            <div class="art-info">
+                                <h3 class="art-title">${obra.Nombre}</h3>
+                                <p style="color: #666; font-size: 0.7rem; margin-top: 5px;">Año: ${new Date(obra.Fecha_creacion).getFullYear()}</p>
+                                <div class="art-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                                    <span class="price">${obra.Precio}$</span>
+                                    <button class="btn-buy" onclick="event.stopPropagation(); comprar(${obra.id_Obra})">Adquirir</button>
+                                </div>
+                            </div>
+                        `;
+                        gallery.appendChild(card);
+                    });
+                } else {
+                    document.getElementById('authorGallery').innerHTML = '<p style="text-align:center; width:100%; color:#444;">Este autor no tiene obras disponibles.</p>';
+                }
+            } catch (error) {
+                console.error("Error cargando perfil:", error);
+            }
+        }
+
+        function comprar(id) { 
+            alert("Solicitud de adquisición para la obra ID: " + id);
+        }
+
+        document.getElementById('sortDate').addEventListener('change', cargarPerfil);
+        window.onload = cargarPerfil;
+
+           document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/estado-usuario')
+        .then(response => response.json())
+        .then(data => {
+            const authContainer = document.querySelector('.auth-buttons');
+            const navContainer = document.querySelector('.nav-container');
+            
+            if (data.autenticado) {
+                authContainer.style.display = 'none';
+
+                fetch('/api/usuario-actual')
+                    .then(res => res.json())
+                    .then(user => {
+                        const userDiv = document.createElement('div');
+                        userDiv.className = 'user-profile';
+                        // Añadimos el estilo al botón de Panel para que se vea profesional
+                        userDiv.innerHTML = `
+                            <span style="margin-right: 15px;">Hola, ${user.nombre}</span>
+                            <a href="../Inicio_sesion/Panel-usuario.html" style="margin-right: 15px; color: #00ff00; text-decoration: none; border: 1px solid #00ff00; padding: 5px 10px; font-size: 0.7rem;">PANEL DE USUARIO</a>
+                            <a href="/logout" class="btn-logout">Cerrar Sesión</a>
+                        `;
+                        navContainer.appendChild(userDiv);
+                    });
+            }
+        });
+});
+    </script>
+</body>
+</html>

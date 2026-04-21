@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Finalizar Compra | MUSEO CONTEMPORANEO</title>
+    <style>
+        body { 
+            background: #050505; color: white; font-family: 'Segoe UI', sans-serif; 
+            margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
+        }
+        .checkout-box { 
+            background: #0a0a0a; border: 1px solid #111; padding: 40px; 
+            width: 100%; max-width: 500px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .obra-resumen { 
+            display: flex; gap: 20px; align-items: center; margin-bottom: 30px; 
+            border-bottom: 1px solid #222; padding-bottom: 20px;
+        }
+        .obra-img { width: 80px; height: 80px; object-fit: cover; border: 1px solid #333; }
+        h2 { margin: 0 0 20px 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; color: #00ff00; }
+        
+        .datos-usuario {
+            background: #0e0e0e; padding: 15px; border-radius: 2px; 
+            border-left: 3px solid #00ff00; margin-bottom: 20px; font-size: 0.9rem;
+        }
+        
+        input { 
+            width: 100%; padding: 12px; background: #111; border: 1px solid #333; 
+            color: white; margin: 8px 0; border-radius: 2px; box-sizing: border-box;
+        }
+        .btn-pagar { 
+            background: #00ff00; color: #000; border: none; padding: 15px; 
+            width: 100%; cursor: pointer; font-weight: 800; text-transform: uppercase; margin-top: 20px;
+            transition: 0.3s;
+        }
+        .btn-pagar:hover { background: #00cc00; box-shadow: 0 0 15px rgba(0, 255, 0, 0.3); }
+        .secure-badge { text-align: center; font-size: 0.7rem; color: #666; margin-top: 20px; }
+        .section-label { font-size: 0.75rem; color: #555; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+<div class="checkout-box">
+    <h2>Confirmar Adquisición</h2>
+    
+    <div class="obra-resumen">
+        <img id="img-obra" src="" class="obra-img" alt="Miniatura de la obra">
+        <div>
+            <div id="titulo-obra" style="font-weight:bold;">Cargando obra...</div>
+            <div id="autor-obra" style="font-size: 0.8rem; color: #888;">Autor</div>
+            <div id="precio-obra" style="color: #00ff00; font-weight: bold; margin-top: 5px;">0$</div>
+        </div>
+    </div>
+
+    <div class="section-label">Información de Envío</div><br>
+    <div class="datos-usuario" id="datos-envio">
+        <div style="color: #666;">Cargando tus datos...</div>
+    </div>
+
+    <form id="form-pago">
+        <div class="section-label">Detalles de Pago</div><br>
+        <input type="text" placeholder="Número de Tarjeta" maxlength="16" required>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" placeholder="MM/AA" maxlength="5" required style="width: 50%;">
+            <input type="password" id="cvv" placeholder="CVC" maxlength="3" required style="width: 50%;">
+        </div>
+        <input type="text" id="codigo-membresia" placeholder="Código de seguridad de membresía" required>
+        
+        <button type="submit" class="btn-pagar">Pagar Ahora</button>
+    </form>
+
+    <div class="secure-badge">
+        🔒 Pago 100% seguro y cifrado. Museo Contemporáneo 2026.
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        // --- 1. CARGAR DATOS DE LA OBRA DESDE LOCALSTORAGE ---
+        const cargarObraSeleccionada = () => {
+            const obraData = localStorage.getItem('obraSeleccionada');
+            if (obraData) {
+                const obra = JSON.parse(obraData);
+                document.getElementById('img-obra').src = obra.imagen;
+                document.getElementById('titulo-obra').innerText = obra.nombre;
+                document.getElementById('autor-obra').innerText = obra.autor;
+                document.getElementById('precio-obra').innerText = `${obra.precio}$`;
+            } else {
+                // Si no hay obra en memoria, regresamos al catálogo
+                alert("No se ha seleccionado ninguna obra.");
+                window.location.href = "Obras.html";
+            }
+        };
+
+     const cargarUsuarioSesion = async () => {
+            try {
+                // Llamamos a la nueva ruta específica para el pago
+                const response = await fetch('/api/datos-envio-pago'); 
+                const datosEnvio = document.getElementById('datos-envio');
+
+                if (response.ok) {
+                    const user = await response.json();
+                    datosEnvio.innerHTML = `
+                        <div style="font-weight:bold; color: #fff;">${user.Nombre} ${user.Apellido}</div>
+                        <div style="color: #aaa;">Dirección: ${user.Calle}</div>
+                        <div style="color: #aaa;">${user.Parroquia}, ${user.Municipio}</div>
+                        <a href="../Inicio_sesion/Perfil.html" style="font-size: 0.7rem; color: #00ff00; text-decoration: none;">Editar dirección</a>
+                    `;
+                } else {
+                    datosEnvio.innerHTML = `<div style="color: #ff4444;">Error al cargar datos de envío.</div>`;
+                }
+            } catch (error) {
+                console.error("Error al obtener datos de envío:", error);
+            }
+        };
+
+// --- 3. PROCESAR EL FORMULARIO DE PAGO ---
+// Dentro del evento submit en pago.html
+// --- 3. PROCESAR EL FORMULARIO DE PAGO ---
+document.getElementById('form-pago').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const btnPagar = e.target.querySelector('.btn-pagar');
+    const obraData = JSON.parse(localStorage.getItem('obraSeleccionada'));
+
+    if (!obraData || !obraData.id_Obra) {
+        alert("Error: No se seleccionó ninguna obra válida.");
+        return;
+    }
+
+    // Feedback visual
+    btnPagar.innerText = "PROCESANDO...";
+    btnPagar.disabled = true;
+
+    try {
+        const response = await fetch('/confirmar-reserva', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id_obra: parseInt(obraData.id_Obra) 
+            })
+        });
+
+        const resultado = await response.json();
+        
+        if (response.ok) {
+            alert("¡Pago procesado y reserva guardada!");
+            localStorage.removeItem('obraSeleccionada');
+            window.location.href = "../Inicio_sesion/Panel-usuario.html";
+        } else {
+            alert("Error: " + (resultado.error || "No se pudo procesar el pago"));
+            btnPagar.innerText = "PAGAR AHORA";
+            btnPagar.disabled = false;
+        }
+    } catch (error) {
+        console.error("Error en la petición:", error);
+        alert("Error de conexión con el servidor.");
+        btnPagar.innerText = "PAGAR AHORA";
+        btnPagar.disabled = false;
+    }
+});
+
+        // Ejecutar cargas al iniciar
+        cargarObraSeleccionada();
+        cargarUsuarioSesion();
+    });
+</script>
+
+</body>
+</html>

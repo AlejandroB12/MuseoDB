@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Premium - Museo de Arte</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: #050505; color: white; display: flex; min-height: 100vh; }
+
+        .sidebar { width: 280px; background: rgba(15, 15, 15, 0.95); border-right: 1px solid #222; padding: 30px; display: flex; flex-direction: column; }
+        .user-info { margin-bottom: 40px; display: flex; align-items: center; gap: 12px; }
+        
+        /* Foto de perfil circular */
+        .avatar { width: 50px; height: 50px; border-radius: 12px; border: 2px solid #00ff00; object-fit: cover; }
+        
+        .menu a { display: block; padding: 12px; color: #888; text-decoration: none; border-radius: 8px; margin-bottom: 5px; transition: 0.3s; }
+        .menu a.active, .menu a:hover { background: rgba(0, 255, 0, 0.1); color: #00ff00; }
+
+        /* Botón Volver al Inicio */
+        .btn-home { 
+            border: 1px solid #333; 
+            margin-bottom: 20px; 
+            text-align: center; 
+            background: #111; 
+            color: #fff !important;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .logout-container { margin-top: auto; padding-top: 20px; }
+        .btn-logout { 
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: rgba(255, 50, 50, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3);
+            padding: 12px; border-radius: 10px; text-decoration: none; font-weight: 600; cursor: pointer; width: 100%;
+        }
+        .btn-logout:hover { background: #ff4d4d; color: white; }
+
+        .main-content { flex: 1; padding: 50px; display: flex; flex-direction: column; align-items: center; }
+
+        .view { display: none; width: 100%; max-width: 800px; }
+        .active-view { display: block; animation: fadeIn 0.4s ease; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+
+        .card { background: #111; border: 1px solid #222; padding: 40px; border-radius: 20px; width: 100%; }
+        
+        /* Estilo para las tarjetas de obras compradas */
+        .obra-comprada-card {
+            background: #1a1a1a; padding: 20px; border-radius: 12px; 
+            border-left: 5px solid #00ff00; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: transform 0.2s;
+        }
+        .obra-comprada-card:hover { transform: scale(1.02); background: #222; }
+
+        input, select { background: #1a1a1a; border: 1px solid #333; color: white; padding: 15px; border-radius: 10px; width: 100%; margin-top: 8px; }
+        .btn-main { background: #00ff00; color: black; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        
+        .tabla-membresia { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: 10px; color: white; }
+        .tabla-membresia th { color: #00ff00; text-transform: uppercase; font-size: 12px; padding: 15px; border-bottom: 2px solid #222; text-align: left; }
+        .tabla-membresia td { padding: 18px; background: #111; border-top: 1px solid #222; border-bottom: 1px solid #222; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="user-info">
+            <img id="user-avatar" src="https://ui-avatars.com/api/?name=U&background=00ff00&color=000&bold=true" class="avatar" alt="Avatar">
+            <div>
+                <p style="font-size: 12px; color: #00ff00;">Premium</p>
+                <p id="sidebar-nombre" style="font-weight: 600;">Cargando...</p> 
+            </div>
+        </div>
+
+        <nav class="menu">
+            <a href="/Contenido/Inicio.html" class="btn-home">🏠 Volver al Inicio</a>
+
+            <a href="#" class="active" onclick="showView('view-dashboard', this)">Dashboard</a>
+            <a href="#" onclick="showView('view-compras', this); cargarCompras();">Mis Compras</a>
+            <a href="#" onclick="showView('view-membresia', this); cargarMembresia();">Membresía</a>
+            <a href="#" onclick="showView('view-seguridad', this)">Códigos de Seguridad</a>
+        </nav>
+
+        <div class="logout-container">
+            <a class="btn-logout" onclick="logout()">
+                <span>✕</span> Cerrar Sesión
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <section id="view-dashboard" class="view active-view">
+            <h1 id="welcome-msg" style="font-size: 3rem;">Bienvenido</h1>
+            <p style="color: #666; margin-top: 10px; font-size: 1.2rem;">Tu panel de control exclusivo está listo.</p>
+        </section>
+        
+        <section id="view-compras" class="view">
+            <div class="card">
+                <h2 style="margin-bottom: 20px; color: #00ff00;">Mis Obras Adquiridas</h2>
+                <div id="lista-compras">
+                    <p style="color: #666;">Consultando tu colección...</p>
+                </div>
+            </div>
+        </section>
+
+           <section id="view-seguridad" class="view">
+            <div class="card">
+                <h2 style="margin-bottom: 10px;">Configuración de Seguridad</h2>
+                <p id="status-msg" style="color: #666; font-size: 14px; margin-bottom: 30px;">Protege tu cuenta con estas 3 preguntas.</p>
+                <form id="form-seguridad">
+                    <div class="question-block" style="margin-bottom: 20px;">
+                        <h3 style="font-size: 16px;">Pregunta #1</h3>
+                        <select name="pregunta1" required>
+                            <option value="mascota">¿Nombre de tu primera mascota?</option>
+                        </select>
+                        <input type="text" name="resp1" placeholder="Tu respuesta" required>
+                    </div>
+                    <div class="question-block" style="margin-bottom: 20px;">
+                        <h3 style="font-size: 16px;">Pregunta #2</h3>
+                        <select name="pregunta2" required>
+                            <option value="escuela">¿Nombre de tu primera escuela?</option>
+                        </select>
+                        <input type="text" name="resp2" placeholder="Tu respuesta" required>
+                    </div>
+                    <div class="question-block" style="margin-bottom: 20px;">
+                        <h3 style="font-size: 16px;">Pregunta #3</h3>
+                        <select name="pregunta3" required>
+                            <option value="ciudad">¿Ciudad donde naciste?</option>
+                        </select>
+                        <input type="text" name="resp3" placeholder="Tu respuesta" required>
+                    </div>
+                    
+                    <button type="submit" id="btn-save" class="btn-main">Guardar Configuración</button>
+                    <button type="button" id="btn-edit" class="btn-edit" onclick="toggleEdit(true)">Modificar Respuestas</button>
+                </form>
+            </div>
+        </section>
+
+          <section id="view-membresia" class="view">
+        <div class="card">
+            <h2 style="margin-bottom: 20px;">Mi Membresía</h2>
+           <table class="tabla-membresia">
+                <thead>
+                    <tr>
+                        <th>Concepto</th>
+                        <th>Fecha Pago</th>
+                        <th>Estado</th>
+                        <th>Días Restantes</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-membresia-body">
+                    </tbody>
+            </table>
+             <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
+            <h3>Informar pago realizado</h3>
+            <div class="input-group">
+                <input type="text" id="card-number" maxlength="19" placeholder="Número de Tarjeta (Simulado)">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <input type="text" id="expiry-date" maxlength="5" placeholder="MM/YY">
+                <input type="password" maxlength="3" placeholder="CVV">
+            </div>
+            <button class="btn-main" onclick="enviarSolicitudPago()" style="background: #0088ff; color: white;">
+                Enviar Pago para Revisión
+            </button>
+            </div>
+        </div>
+    </section>
+    </main>
+
+    <script>
+        // Lógica para cambiar entre vistas
+        function showView(viewId, element) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+            document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active-view');
+            element.classList.add('active');
+        }
+
+        // CARGA INICIAL: Nombre y Foto personalizada
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/api/usuario-actual')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.nombre) {
+                        // Actualizar texto de bienvenida
+                        document.getElementById('sidebar-nombre').innerText = data.nombre;
+                        document.getElementById('welcome-msg').innerText = `¡Bienvenido, ${data.nombre}!`;
+                        
+                        // Foto de perfil basada en inicial
+                        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nombre)}&background=00ff00&color=000&bold=true&size=128`;
+                        document.getElementById('user-avatar').src = avatarUrl;
+                    }
+                })
+                .catch(err => console.error("Error cargando sesión:", err));
+        });
+
+        // CONSULTA A BASE DE DATOS: Cargar obras compradas
+        async function cargarCompras() {
+            const contenedor = document.getElementById('lista-compras');
+            try {
+                const res = await fetch('/mis-compras');
+                const obras = await res.json();
+
+                contenedor.innerHTML = '';
+                if (obras.length === 0) {
+                    contenedor.innerHTML = '<p style="color: #666;">Aún no has realizado ninguna compra.</p>';
+                    return;
+                }
+
+                obras.forEach(obra => {
+                    contenedor.innerHTML += `
+                        <div class="obra-comprada-card">
+                            <div>
+                                <strong style="font-size: 1.1rem; color: #fff;">${obra.Nombre}</strong>
+                                <p style="color: #888; font-size: 0.9rem;">Género: ${obra.Genero}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <p style="color: #00ff00; font-weight: bold; font-size: 1.2rem;">$${obra.Precio}</p>
+                                <p style="color: #444; font-size: 0.8rem;">Fecha: ${new Date(obra.Fecha_emision).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error("Error al cargar obras:", error);
+                contenedor.innerHTML = '<p style="color: #ff4d4d;">Error al conectar con la base de datos.</p>';
+            }
+        }
+
+        // Resto de funciones (Membresía, Logout, Seguridad) se mantienen igual...
+        async function cargarMembresia() {
+            const tbody = document.getElementById('tabla-membresia-body');
+            try {
+                const response = await fetch('/api/membresia-usuario');
+                const datos = await response.json();
+                tbody.innerHTML = '';
+                if (datos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Sin registros.</td></tr>';
+                    return;
+                }
+                datos.forEach(pago => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${pago.Concepto}</td>
+                            <td>${new Date(pago.FechaPago).toLocaleDateString()}</td>
+                            <td style="color: ${pago.EstadoPago === 'Activa' ? '#00ff00' : '#ff0000'}">${pago.EstadoPago}</td>
+                            <td>${pago.DiasRestantes > 0 ? pago.DiasRestantes : 0} días</td>
+                        </tr>
+                    `;
+                });
+            } catch (error) { console.error(error); }
+        }
+
+        function logout() {
+            if(confirm("¿Deseas cerrar tu sesión premium?")) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = "/inicio_sesion/login.html"; 
+            }
+        }
+
+        // --- LÓGICA DE GESTIÓN DE PAGOS ---
+        async function enviarSolicitudPago() {
+            // 1. Obtener valores
+            const card = document.getElementById('card-number').value;
+            const expiry = document.getElementById('expiry-date').value;
+            
+            // 2. Validación básica
+            if (card.length < 13) {
+                return alert("Por favor, ingresa un número de tarjeta válido.");
+            }
+            if (expiry.length < 5) {
+                return alert("Ingresa una fecha de expiración válida (MM/YY).");
+            }
+            
+            // 3. Confirmación
+            if(!confirm("¿Confirmas que deseas enviar los datos para revisión del administrador?")) return;
+            
+            try {
+                // 4. Enviar al servidor
+                const response = await fetch('/solicitar-pago', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        cardNumber: card, // Puedes enviar esto para que el admin lo vea en la base de datos
+                        expiry: expiry 
+                    })
+                });
+
+                if (response.ok) {
+                    alert("Solicitud enviada con éxito. El administrador revisará tu información pronto.");
+                    // Limpiar campos tras éxito
+                    document.getElementById('card-number').value = '';
+                    document.getElementById('expiry-date').value = '';
+                } else {
+                    alert("Error al enviar la solicitud al servidor.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Ocurrió un error de conexión.");
+            }
+        }
+
+       // Asegúrate de que este evento esté correctamente asignado
+        const form = document.getElementById('form-seguridad');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // ¡Esto evita el envío tradicional del formulario!
+
+            const datos = [
+                { pregunta: form.querySelector('select[name="pregunta1"]').value, resp: form.querySelector('input[name="resp1"]').value },
+                { pregunta: form.querySelector('select[name="pregunta2"]').value, resp: form.querySelector('input[name="resp2"]').value },
+                { pregunta: form.querySelector('select[name="pregunta3"]').value, resp: form.querySelector('input[name="resp3"]').value }
+            ];
+
+            try {
+                const response = await fetch('/guardar-seguridad', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+
+                if (response.ok) {
+                    alert("¡Preguntas guardadas con éxito!");
+                } else {
+                    const errorText = await response.text();
+                    alert("Error: " + errorText);
+                }
+            } catch (error) {
+                console.error("Error al conectar:", error);
+            }
+        });
+    </script>
+</body>
+</html>

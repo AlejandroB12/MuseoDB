@@ -1,0 +1,336 @@
+const express = require('express');
+const router = express.Router();
+const nodemailer = require('nodemailer');
+const path = require('path');
+
+// --- IMPORTACIÓN DE BASE DE DATOS ---
+const db = require('./database'); 
+
+// --- CONFIGURACIÓN DE NODEMAILER ---
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'fg57179@gmail.com',
+        pass: 'yryx bqbc hptv dawc'
+    }
+});
+
+// --- RUTAS DE AUTENTICACIÓN ---
+router.post('/login-auth', (req, res) => {
+    const { username, password } = req.body;
+    const sql = "SELECT * FROM Usuario WHERE Email = ? AND Contraseña = ?";
+    
+    db.query(sql, [username, password], (err, results) => {
+        if (err) return res.status(500).send("Error en el servidor");
+        
+        if (results.length > 0) {
+            const usuario = results[0];
+            req.session.id_usuario = usuario.id_usuario; 
+
+            if (usuario.Estatus === 0) {
+                return res.sendFile(path.join(__dirname, 'inicio_sesion', 'Cuenta-pendiente.html'));
+            }
+
+            const sqlPago = "SELECT FechaPago FROM Membresia WHERE id_usuario = ? ORDER BY FechaPago DESC LIMIT 1";
+            
+            db.query(sqlPago, [usuario.id_usuario], (err, pagos) => {
+                if (err) return res.status(500).send("Error al verificar membresía");
+
+                if (pagos.length > 0) {
+                    const fechaPago = new Date(pagos[0].FechaPago);
+                    const hoy = new Date();
+                    const diffTime = Math.abs(hoy - fechaPago);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays > 30) {
+                        return res.send("<h1>Acceso Denegado</h1><p>Tu membresía ha vencido. Contacta al administrador.</p>");
+                    }
+                } else if (usuario.Rol !== 'administrador') {
+                    return res.send("<h1>Acceso Denegado</h1><p>No se encontró registro de pago.</p>");
+                }
+
+                if (usuario.Rol === 'administrador') {
+                    res.redirect('/Admin.html'); 
+                } else {
+                    res.redirect(`/inicio_sesion/Panel-usuario.html?email=${usuario.Email}`);
+                }
+            });
+        } else {
+            res.status(401).sendFile(path.join(__dirname, 'inicio_sesion', 'Credenciales-incorrectas.html'));
+        }
+    });
+});
+
+// --- RECUPERACIÓN DE CONTRASEÑA ---
+router.post('/recuperar-pw', (req, res) => {
+    const { correo } = req.body;
+    const sql = "SELECT id_usuario FROM Usuario WHERE Email = ?";
+    
+    db.query(sql, [correo], (err, results) => {
+        if (err) return res.status(500).send("Error en el servidor");
+        if (results.length > 0) {
+            const userId = results[0].id_usuario;
+            const enlaceRecuperacion = `http://localhost:3000/Nueva-contraseña.html?id=${userId}`;
+            const mailOptions = {
+                from: '"Museo Virtual" <fg57179@gmail.com>',
+                to: correo,
+                subject: 'Restablecer tu contraseña',
+                html: `<div style="text-align: center;"><h2>Recuperación</h2><a href="${enlaceRecuperacion}">Click aquí para cambiar contraseña</a></div>`
+            };
+            transporter.sendMail(mailOptions, (error) => {
+                if (error) return res.status(500).send("Error al enviar el correo.");
+                res.sendFile(path.join(__dirname, 'interfaz-usuario', 'Confirmacion-envio.html'));
+            });
+        } else {
+            res.status(404).send("<h2>Correo no encontrado</h2>");
+        }
+    });
+});
+
+// --- REGISTRO CON TRANSACCIÓN PARA COMPRADORES ---
+router.post('/registrar', (req, res) => {
+    const { nombre, apellido, telefono, correo, password, cedula, parroquia, calle } = req.body;
+    const codigoVerificacion = Math.floor(100000 + Math.random() * 900000);
+
+    db.beginTransaction((err) => {
+        if (err) { console.error(err); return res.status(500).send("Error de inicio de transacción"); }
+
+        // CAMBIO 1: Insertar nombre y apellido en la tabla Usuario
+        const sqlUser = "INSERT INTO Usuario (Email, Contraseña, Nombre, Apellido, Estatus, Rol) VALUES (?, ?, ?, ?, 0, 'comprador')";
+        
+        db.query(sqlUser, [correo, password, nombre, apellido], (err, result) => {
+            if (err) {
+                return db.rollback(() => {
+                    console.error("Error en tabla Usuario:", err.message);
+                    res.status(500).send("Error al crear usuario: " + err.message);
+                });
+            }
+            
+            const idUsuario = result.insertId;
+
+            // CAMBIO 2: Eliminar Nombre y Apellido de esta consulta (ya se guardaron arriba)
+            const sqlComprador = "INSERT INTO Comprador (id_usuario, Cedula, Telefono, CodigoVerificacion, id_parroquia, Calle) VALUES (?, ?, ?, ?, ?, ?)";
+            
+            if (!cedula) {
+                return db.rollback(() => res.status(400).send("Error: La cédula es obligatoria para compradores."));
+            }
+
+            // Ajustamos los parámetros para que coincidan con las columnas de la tabla Comprador
+            db.query(sqlComprador, [idUsuario, cedula, telefono, codigoVerificacion, parroquia || null, calle], (err) => {
+                if (err) {
+                    return db.rollback(() => {
+                        console.error("ERROR DETALLADO EN COMPRADOR:", err);
+                        res.status(500).send("Error en Comprador: " + err.message);
+                    });
+                }
+
+                const sqlMembresia = "INSERT INTO Membresia (FechaPago, MontoPagado, id_usuario) VALUES (CURDATE(), 10.00, ?)";
+                db.query(sqlMembresia, [idUsuario], (errMem) => {
+                    if (errMem) return db.rollback(() => res.status(500).send("Error en Membresía"));
+
+                    db.commit((err) => {
+                        if (err) return db.rollback(() => res.status(500).send("Error en Commit"));
+                        
+                        transporter.sendMail({
+                            from: '"Museo Virtual"',
+                            to: correo,
+                            subject: 'Tu Código Único',
+                            html: `<h1>Hola ${nombre}</h1><p>Tu registro fue exitoso. Tu código es: <b>${codigoVerificacion}</b></p>`
+                        }, (error) => {
+                            if (error) console.error("Error al enviar correo:", error);
+                            res.sendFile(path.join(__dirname, 'inicio_sesion', 'Mensaje-exitoso.html'));
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+// --- API PARA UBICACIÓN ---
+router.get('/api/estados', (req, res) => {
+    db.query("SELECT id_estado, nombre FROM estado", (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+router.get('/api/municipios/:id_estado', (req, res) => {
+    db.query("SELECT id_municipio, nombre FROM municipio WHERE id_estado = ?", [req.params.id_estado], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+router.get('/api/parroquias/:id_municipio', (req, res) => {
+    db.query("SELECT id_parroquia, nombre FROM parroquia WHERE id_municipio = ?", [req.params.id_municipio], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+// --- OTROS ENDPOINTS ---
+router.get('/api/usuario-actual', (req, res) => {
+    if (!req.session.id_usuario) return res.status(401).json({ error: "No iniciado" });
+    
+    const sql = "SELECT Nombre FROM Comprador WHERE id_usuario = ?";
+    db.query(sql, [req.session.id_usuario], (err, results) => {
+        if (err || results.length === 0) return res.status(500).json({ error: "Error" });
+        res.json({ nombre: results[0].Nombre });
+    });
+});
+
+router.post('/guardar-seguridad', (req, res) => {
+   console.log("Sesión:", req.session.id_usuario); // MIRA ESTO EN LA CONSOLA
+    console.log("Datos recibidos:", req.body);      // MIRA ESTO EN LA CONSOLA
+
+    if (!req.session.id_usuario) {
+        return res.status(401).send("Debes iniciar sesión para guardar esto.");
+    }
+
+
+    const id_usuario = req.session.id_usuario;
+    const datos = req.body; // Asegúrate de que el frontend envíe un array de objetos
+
+    // Limpiamos preguntas anteriores del usuario (opcional, para evitar duplicados)
+    db.query("DELETE FROM CodigoSeguridad WHERE id_usuario = ?", [id_usuario], (err) => {
+        
+        // Insertamos las nuevas
+        const valores = datos.map(p => [p.pregunta, p.resp, id_usuario]);
+        const sql = "INSERT INTO CodigoSeguridad (Pregunta, Respuesta, id_usuario) VALUES ?";
+
+        db.query(sql, [valores], (err) => {
+            if (err) return res.status(500).send("Error al guardar: " + err.message);
+            res.send("Preguntas guardadas con éxito");
+        });
+    });
+});
+
+router.get('/api/membresia-usuario', (req, res) => {
+    const idUsuario = req.session.id_usuario;
+    if (!idUsuario) return res.status(401).json({ error: "Sesión no iniciada" });
+
+    const sql = `
+        SELECT 
+            'Membresía Premium' AS Concepto,
+            MIN(FechaPago) AS FechaInicio,
+            SUM(MontoPagado) AS TotalPagado,
+            DATE_ADD(MIN(FechaPago), INTERVAL (SUM(MontoPagado) / 10 * 30) DAY) AS FechaVencimiento,
+            CASE 
+                WHEN CURDATE() <= DATE_ADD(MIN(FechaPago), INTERVAL (SUM(MontoPagado) / 10 * 30) DAY) THEN 'Activa'
+                ELSE 'Vencida'
+            END AS EstadoPago,
+            GREATEST(0, DATEDIFF(DATE_ADD(MIN(FechaPago), INTERVAL (SUM(MontoPagado) / 10 * 30) DAY), CURDATE())) AS DiasRestantes
+        FROM Membresia 
+        WHERE id_usuario = ?
+        GROUP BY id_usuario`;
+
+    db.query(sql, [idUsuario], (err, results) => {
+        if (err) return res.status(500).json({ error: "Error de base de datos" });
+        res.json(results);
+    });
+});
+
+router.post('/solicitar-pago', (req, res) => {
+    if (!req.session.id_usuario) return res.status(401).send("No autorizado");
+    const sql = "INSERT INTO SolicitudPago (id_usuario, Estatus) VALUES (?, 'Pendiente')";
+    db.query(sql, [req.session.id_usuario], (err) => {
+        if (err) return res.status(500).send("Error al registrar");
+        res.send("Solicitud enviada");
+    });
+});
+
+router.get('/mis-compras', (req, res) => {
+    const idUsuario = req.session.id_usuario;
+    if (!idUsuario) return res.status(401).json({ error: "Sesión no válida" });
+
+    // Consulta corregida con el campo correcto 'Nombre'
+    const sql = `
+        SELECT 
+            o.Nombre,
+            o.Precio, 
+            f.Fecha_Venta AS Fecha_emision,
+            g.Descripcion AS Genero
+        FROM Factura f
+        INNER JOIN Obra o ON f.id_obra = o.id_Obra
+        INNER JOIN Comprador c ON f.id_comprador = c.id_usuario
+        LEFT JOIN Genero g ON o.Genero_id_Genero = g.id_Genero
+        WHERE c.id_usuario = ?
+        ORDER BY f.Fecha_Venta DESC`;
+
+    db.query(sql, [idUsuario], (err, results) => {
+        if (err) {
+            console.error("--- ERROR EN BASE DE DATOS ---");
+            console.error("Mensaje:", err.message);
+            return res.status(500).json({ error: "Error en la consulta: " + err.message });
+        }
+        
+        console.log("Compras encontradas:", results.length);
+        res.json(results);
+    });
+});
+
+// En Login.js
+router.get('/api/datos-envio-pago', (req, res) => {
+    if (!req.session.id_usuario) return res.status(401).json({ error: "No iniciado" });
+    
+    // Consulta extendida incluyendo tablas de ubicación si tu base de datos lo permite
+    // Usamos un LEFT JOIN para traer los nombres de las tablas relacionadas si existen
+    const sql = `
+        SELECT c.Nombre, c.Apellido, c.Calle, p.nombre AS Parroquia, m.nombre AS Municipio
+        FROM Comprador c
+        LEFT JOIN Parroquia p ON c.id_parroquia = p.id_parroquia
+        LEFT JOIN Municipio m ON p.id_municipio = m.id_municipio
+        WHERE c.id_usuario = ?`;
+
+    db.query(sql, [req.session.id_usuario], (err, results) => {
+        if (err || results.length === 0) return res.status(500).json({ error: "Error al obtener datos" });
+        
+        res.json(results[0]); 
+    });
+});
+// --- RUTA PARA REGISTRAR LA RESERVA Y ACTUALIZAR ESTADO DE OBRA ---
+router.post('/confirmar-reserva', (req, res) => {
+    if (!req.session.id_usuario) return res.status(401).json({ error: "Sesión expirada" });
+
+    const { id_obra } = req.body;
+    const id_usuario = req.session.id_usuario;
+    const fecha = new Date();
+
+    // Usar transacción para asegurar que ambas operaciones se completen
+    db.beginTransaction((err) => {
+        if (err) return res.status(500).json({ error: "Error al iniciar transacción" });
+
+        // 1. Insertar la reserva
+        const sqlReserva = "INSERT INTO Reserva (id_Obra, id_Usuario, Fecha_Reserva) VALUES (?, ?, ?)";
+        db.query(sqlReserva, [id_obra, id_usuario, fecha], (err, result) => {
+            if (err) {
+                return db.rollback(() => {
+                    res.status(500).json({ error: "Error al crear reserva: " + err.message });
+                });
+            }
+
+            // 2. Actualizar el estado de la obra a 'Reservada'
+            const sqlObra = "UPDATE Obra SET Estado_Obra = 'Reservada' WHERE id_Obra = ?";
+            db.query(sqlObra, [id_obra], (err, result) => {
+                if (err) {
+                    return db.rollback(() => {
+                        res.status(500).json({ error: "Error al actualizar obra: " + err.message });
+                    });
+                }
+
+                // Si todo salió bien, confirmar la transacción
+                db.commit((err) => {
+                    if (err) {
+                        return db.rollback(() => {
+                            res.status(500).json({ error: "Error al confirmar transacción" });
+                        });
+                    }
+                    res.json({ success: true, message: "Reserva confirmada y obra actualizada" });
+                });
+            });
+        });
+    });
+});
+
+module.exports = router;

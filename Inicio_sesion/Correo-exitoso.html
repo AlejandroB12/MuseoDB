@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Exitoso</title>
+    <link rel="stylesheet" href="Estilos/Estilo-correo-exitoso.css">
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="login-container register-container">
+            <div class="login-form success-card">
+                <div class="icon-box">✔</div>
+                <h2>¡Registro Exitoso!</h2>
+                <p class="welcome-text">Bienvenido, <span>${nombre}</span>.</p>
+                
+                <div class="info-box">
+                    <p>Se ha enviado un código de seguridad a:</p>
+                    <p class="email-display">${correo}</p>
+                </div>
+                
+                <p class="spam-notice">(Revisa tu bandeja de entrada o spam)</p>
+                
+                <a href="/Login.html" class="login-btn">Ir al Login</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
