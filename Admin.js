@@ -580,44 +580,47 @@ router.post('/api/registrar-envio', (req, res) => {
 // 8. RUTAS PARA DATOS GEOGRÁFICOS
 // ==========================================
 
-router.get('/api/estados', (req, res) => {
-    db.query("SELECT id_estado, nombre FROM Estado ORDER BY nombre", (err, results) => {
-        if (err) {
-            console.error('Error obteniendo estados:', err);
-            return res.status(500).json({ success: false, message: 'Error en BD' });
-        }
-        res.json({ success: true, estados: results });
+    router.get('/api/estados', (req, res) => {
+        db.query("SELECT id_estado, nombre FROM Estado ORDER BY nombre", (err, results) => {
+            if (err) {
+                console.error('Error obteniendo estados:', err);
+                return res.status(500).json({ success: false, message: 'Error en BD' });
+            }
+            res.json({ success: true, estados: results });
+        });
     });
-});
 
-router.get('/api/municipios/:id_estado', (req, res) => {
-    const { id_estado } = req.params;
-    db.query(
-        "SELECT id_municipio, nombre FROM Municipio WHERE id_estado = ? ORDER BY nombre", 
-        [id_estado], 
-        (err, results) => {
-            if (err) {
-                console.error('Error obteniendo municipios:', err);
-                return res.status(500).json({ success: false, message: 'Error en BD' });
-            }
-            res.json({ success: true, municipios: results });
-        }
-    );
-});
 
-router.get('/api/parroquias/:id_municipio', (req, res) => {
-    const { id_municipio } = req.params;
-    db.query(
-        "SELECT id_parroquia, nombre FROM Parroquia WHERE id_municipio = ? ORDER BY nombre", 
-        [id_municipio], 
-        (err, results) => {
-            if (err) {
-                console.error('Error obteniendo parroquias:', err);
-                return res.status(500).json({ success: false, message: 'Error en BD' });
+    router.get('/api/municipios/:id_estado', (req, res) => {
+        const { id_estado } = req.params;
+        db.query(
+            "SELECT id_municipio, nombre FROM Municipio WHERE id_estado = ? ORDER BY nombre", 
+            [id_estado], 
+            (err, results) => {
+                if (err) {
+                    console.error('Error obteniendo municipios:', err);
+                    return res.status(500).json({ success: false, message: 'Error en BD' });
+                }
+                res.json({ success: true, municipios: results });
             }
-            res.json({ success: true, parroquias: results });
-        }
-    );
-});
+        );
+    });
+
+
+    router.get('/api/parroquias/:id_municipio', (req, res) => {
+        const { id_municipio } = req.params;
+        db.query(
+            "SELECT id_parroquia, nombre FROM Parroquia WHERE id_municipio = ? ORDER BY nombre", 
+            [id_municipio], 
+            (err, results) => {
+                if (err) {
+                    console.error('Error obteniendo parroquias:', err);
+                    return res.status(500).json({ success: false, message: 'Error en BD' });
+                }
+                res.json({ success: true, parroquias: results });
+            }
+        );
+    });
+
 
 module.exports = router;
