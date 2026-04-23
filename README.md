@@ -31,3 +31,24 @@ El desarrollo de este proyecto fue realizado por:
  - Alejandro Briceño
  - Kelvys Concepcion
  - Rolanny Sanchez
+
+## 📂 Estructura del Proyecto
+
+```text
+Museo-Contemporaneo/
+├── 📁 Administrador/        # Lógica y vistas de administración
+│   ├── 📄 (Archivo HTML 1)
+│   └── 📄 (Archivo HTML 2)
+├── 📁 Assets/               # Recursos (CSS, Imágenes)
+├── 📁 Diseño BD/            # Documentación del modelo de datos
+├── 📁 Iconos/               # Recursos gráficos
+├── 📁 Inicio_sesion/        # Módulo de autenticación
+├── 📁 SQL/                  # Scripts de creación de tablas
+├── 📁 views/                # Vistas generales del sistema
+├── 📄 Admin.js              # Controlador de administración
+├── 📄 Catalogo.js           # Lógica del catálogo
+├── 📄 Inicio.html           # Página principal
+├── 📄 Login.js              # Lógica de acceso
+├── 📄 Servidor.js           # Archivo principal de Node.js (Express)
+├── 📄 database.js           # Configuración de conexión MySQL
+└── 📄 README.md             # Documentación del proyecto

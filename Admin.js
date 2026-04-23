@@ -42,9 +42,9 @@ router.post('/admin-auth', (req, res) => {
     db.query(sql, [username, password], (err, results) => {
         if (err) return res.status(500).send("Error en el servidor");
         if (results.length > 0) {
-            res.redirect('/inicio_sesion/Panel-adminsitrador.html');
+            res.redirect('/Admin/Panel-adminsitrador.html');
         } else {
-            res.status(401).sendFile(path.join(__dirname, 'Administrador', 'Credenciales-incorrectas-administrador.html'));
+            res.status(401).sendFile(path.join(__dirname, 'Admin', 'Credenciales-incorrectas-administrador.html'));
         }
     });
 });
