@@ -19,7 +19,7 @@ const app = express();
 // --- REDIRECCIÓN INICIAL ---
     // Al entrar a http://localhost:3000 te enviará al Inicio directamente
     app.get('/', (req, res) => {
-        res.redirect('/Views/Inicio.html');
+        res.redirect('/views/public/Inicio.html');
     });
 
 // --- IMPORTAR RUTAS ---
