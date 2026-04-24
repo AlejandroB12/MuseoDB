@@ -19,24 +19,33 @@ const app = express();
         cookie: { secure: false } 
     }));
 
+
+
 // --- REDIRECCIÓN INICIAL ---
     // Al entrar a http://localhost:3000 te enviará al Inicio directamente
     app.get('/', (req, res) => {
         res.redirect('/public/Inicio.html');
     });
 
+
+
 // --- IMPORTAR RUTAS ---
     const loginRoutes = require('./Login');
     const catalogoRoutes = require('./Catalogo');
     const adminRoutes = require('./Admin'); 
+
+
 
 // --- USAR RUTAS ---
     app.use('/', loginRoutes);
     app.use('/api', catalogoRoutes);
     app.use('/', adminRoutes);  
 
+
+
 // --- INICIO DEL SERVIDOR ---
 const PORT = 3000;
+
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
