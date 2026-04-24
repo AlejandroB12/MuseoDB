@@ -52,11 +52,11 @@ router.post('/login-auth', (req, res) => {
                 if (usuario.Rol === 'administrador') {
                     res.redirect('/Admin.html'); 
                 } else {
-                    res.redirect(`/public/Panel-usuario.html?email=${usuario.Email}`);
+                    res.redirect(`/user/Panel-usuario.html?email=${usuario.Email}`);
                 }
             });
         } else {
-            res.redirect('/user/Credenciales-incorrectas.html');
+            res.redirect('/recovery/Credenciales-incorrectas.html');
         }
     });
 });
@@ -70,7 +70,7 @@ router.post('/recuperar-pw', (req, res) => {
         if (err) return res.status(500).send("Error en el servidor");
         if (results.length > 0) {
             const userId = results[0].id_usuario;
-            const enlaceRecuperacion = `http://localhost:3000/Nueva-contraseña.html?id=${userId}`;
+            const enlaceRecuperacion = `http://localhost:3000/Recovery/Nueva-contraseña.html?id=${userId}`;
             const mailOptions = {
                 from: '"Museo Virtual" <fg57179@gmail.com>',
                 to: correo,
@@ -79,12 +79,21 @@ router.post('/recuperar-pw', (req, res) => {
             };
             transporter.sendMail(mailOptions, (error) => {
                 if (error) return res.status(500).send("Error al enviar el correo.");
-                res.redirect('/user/Confirmacion-envio.html');
-                res.sendFile(path.join(__dirname, 'interfaz-usuario', 'Confirmacion-envio.html'));
+                res.redirect('/recovery/Confirmacion-envio.html');
             });
         } else {
             res.status(404).send("<h2>Correo no encontrado</h2>");
         }
+    });
+});
+
+// Actualización de contraseña
+router.post('/update-password', (req, res) => {
+    const { userId, newPassword } = req.body;
+    const sql = "UPDATE Usuario SET Contraseña = ? WHERE id_Usuario = ?";
+    db.query(sql, [newPassword, userId], (err) => {
+        if (err) return res.status(500).send("Error al actualizar");
+         res.redirect('/recovery/Actualizacion-contraseña.html');
     });
 });
 
