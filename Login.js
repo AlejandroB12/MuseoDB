@@ -52,11 +52,11 @@ router.post('/login-auth', (req, res) => {
                 if (usuario.Rol === 'administrador') {
                     res.redirect('/Admin.html'); 
                 } else {
-                    res.redirect(`/inicio_sesion/Panel-usuario.html?email=${usuario.Email}`);
+                    res.redirect(`/public/Panel-usuario.html?email=${usuario.Email}`);
                 }
             });
         } else {
-            res.status(401).sendFile(path.join(__dirname, 'inicio_sesion', 'Credenciales-incorrectas.html'));
+            res.redirect('/user/Credenciales-incorrectas.html');
         }
     });
 });
@@ -79,6 +79,7 @@ router.post('/recuperar-pw', (req, res) => {
             };
             transporter.sendMail(mailOptions, (error) => {
                 if (error) return res.status(500).send("Error al enviar el correo.");
+                res.redirect('/user/Confirmacion-envio.html');
                 res.sendFile(path.join(__dirname, 'interfaz-usuario', 'Confirmacion-envio.html'));
             });
         } else {

@@ -6,7 +6,10 @@ const app = express();
 // --- MIDDLEWARES ---
     app.use(express.json()); 
     app.use(express.urlencoded({ extended: true }));
-    app.use(express.static(__dirname)); 
+    app.use(express.static(path.join(__dirname, 'views'))); 
+    app.use(express.static(path.join(__dirname, 'Assets'))); 
+
+
 
 // --- CONFIGURACIÓN DE SESIÓN ---
     app.use(session({
@@ -19,7 +22,7 @@ const app = express();
 // --- REDIRECCIÓN INICIAL ---
     // Al entrar a http://localhost:3000 te enviará al Inicio directamente
     app.get('/', (req, res) => {
-        res.redirect('/views/public/inicio.html');
+        res.redirect('/public/Inicio.html');
     });
 
 // --- IMPORTAR RUTAS ---
