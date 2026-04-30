@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 const path = require('path');
 
 // --- IMPORTACIÓN DE BASE DE DATOS ---
-const db = require('./database'); 
+const db = require('../config/database'); 
 
 // --- CONFIGURACIÓN DE NODEMAILER ---
 const transporter = nodemailer.createTransport({
@@ -28,7 +28,7 @@ router.post('/login-auth', (req, res) => {
             req.session.id_usuario = usuario.id_usuario; 
 
             if (usuario.Estatus === 0) {
-                return res.sendFile(path.join(__dirname, 'inicio_sesion', 'Cuenta-pendiente.html'));
+                return res.sendFile(path.join(__dirname, '..', 'views', 'user', 'Cuenta-pendiente.html'));
             }
 
             const sqlPago = "SELECT FechaPago FROM Membresia WHERE id_usuario = ? ORDER BY FechaPago DESC LIMIT 1";
@@ -56,7 +56,7 @@ router.post('/login-auth', (req, res) => {
                 }
             });
         } else {
-            res.redirect('/recovery/Credenciales-incorrectas.html');
+            res.redirect('/user/Credenciales-incorrectas.html');
         }
     });
 });
@@ -148,7 +148,8 @@ router.post('/registrar', (req, res) => {
                             html: `<h1>Hola ${nombre}</h1><p>Tu registro fue exitoso. Tu código es: <b>${codigoVerificacion}</b></p>`
                         }, (error) => {
                             if (error) console.error("Error al enviar correo:", error);
-                            res.sendFile(path.join(__dirname, 'inicio_sesion', 'Mensaje-exitoso.html'));
+                            res.redirect('/user/Mensaje-exitoso.html');
+                            //res.sendFile(path.join(__dirname, 'inicio_sesion', 'Mensaje-exitoso.html'));
                         });
                     });
                 });
@@ -340,6 +341,31 @@ router.post('/confirmar-reserva', (req, res) => {
                 });
             });
         });
+    });
+});
+
+router.get('/api/estado-usuario', (req, res) => {
+    if (req.session && req.session.id_usuario) {
+        // Si hay sesión, devolvemos el estado de "autenticado"
+        res.json({ autenticado: true });
+    } else {
+        res.json({ autenticado: false });
+    }
+});
+
+router.get('/logout', (req, res) => {
+    // 1. Destruye la sesión en el servidor
+    req.session.destroy((err) => {
+        if (err) {
+            console.error("Error al destruir sesión:", err);
+            return res.status(500).send("No se pudo cerrar la sesión");
+        }
+        
+        // 2. Borra la cookie del navegador (esencial para que el cliente no mantenga sesión)
+        res.clearCookie('connect.sid', { path: '/' });
+        
+        // 3. Redirige a la página pública (Ej: Inicio.html servido por la raíz)
+        res.redirect('/'); 
     });
 });
 

@@ -74,7 +74,7 @@
         </div>
 
         <nav class="menu">
-            <a href="/Contenido/Inicio.html" class="btn-home">🏠 Volver al Inicio</a>
+            <a href="/public/Inicio.html" class="btn-home">🏠 Volver al Inicio</a>
 
             <a href="#" class="active" onclick="showView('view-dashboard', this)">Dashboard</a>
             <a href="#" onclick="showView('view-compras', this); cargarCompras();">Mis Compras</a>
@@ -254,10 +254,10 @@
         }
 
         function logout() {
-            if(confirm("¿Deseas cerrar tu sesión premium?")) {
+            if(confirm("¿Deseas cerrar tu sesión?")) {
                 localStorage.clear();
                 sessionStorage.clear();
-                window.location.href = "/inicio_sesion/login.html"; 
+                window.location.href = "/public/Inicio.html"; 
             }
         }
 

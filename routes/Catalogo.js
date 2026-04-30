@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('./database'); 
+const db = require('../config/database'); 
 
 // Función auxiliar para convertir Buffers a Base64 de forma segura
 const bufferToBase64 = (campo) => {
