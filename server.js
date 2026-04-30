@@ -7,7 +7,7 @@ const app = express();
     app.use(express.json()); 
     app.use(express.urlencoded({ extended: true }));
     app.use(express.static(path.join(__dirname, 'views'))); 
-    app.use(express.static(path.join(__dirname, 'Assets'))); 
+    app.use(express.static(path.join(__dirname, 'assets'))); 
 
 // --- CONFIGURACIÓN DE SESIÓN ---
     app.use(session({
