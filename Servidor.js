@@ -9,8 +9,6 @@ const app = express();
     app.use(express.static(path.join(__dirname, 'views'))); 
     app.use(express.static(path.join(__dirname, 'Assets'))); 
 
-
-
 // --- CONFIGURACIÓN DE SESIÓN ---
     app.use(session({
         secret: 'clave-secreta-museo-2026',
@@ -19,29 +17,22 @@ const app = express();
         cookie: { secure: false } 
     }));
 
-
-
 // --- REDIRECCIÓN INICIAL ---
+
     // Al entrar a http://localhost:3000 te enviará al Inicio directamente
     app.get('/', (req, res) => {
         res.redirect('/public/Inicio.html');
     });
-
-
 
 // --- IMPORTAR RUTAS ---
     const loginRoutes = require('./routes/Login');
     const catalogoRoutes = require('./routes/Catalogo');
     const adminRoutes = require('./routes/Admin'); 
 
-
-
 // --- USAR RUTAS ---
     app.use('/', loginRoutes);
     app.use('/api', catalogoRoutes);
     app.use('/', adminRoutes);  
-
-
 
 // --- INICIO DEL SERVIDOR ---
 const PORT = 3000;
