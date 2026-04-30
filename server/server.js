@@ -25,9 +25,9 @@ const app = express();
     });
 
 // --- IMPORTAR RUTAS ---
-    const loginRoutes = require('./routes/Login');
-    const catalogoRoutes = require('./routes/Catalogo');
-    const adminRoutes = require('./routes/Admin'); 
+    const loginRoutes = require('../routes/Login');
+    const catalogoRoutes = require('../routes/Catalogo');
+    const adminRoutes = require('../routes/Admin'); 
 
 // --- USAR RUTAS ---
     app.use('/', loginRoutes);
