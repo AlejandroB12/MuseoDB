@@ -28,7 +28,7 @@ router.post('/login-auth', (req, res) => {
             req.session.id_usuario = usuario.id_usuario; 
 
             if (usuario.Estatus === 0) {
-                return res.sendFile(path.join(__dirname, 'inicio_sesion', 'Cuenta-pendiente.html'));
+                return res.sendFile(path.join(__dirname, 'views', 'user', 'Cuenta-pendiente.html'));
             }
 
             const sqlPago = "SELECT FechaPago FROM Membresia WHERE id_usuario = ? ORDER BY FechaPago DESC LIMIT 1";
@@ -148,7 +148,8 @@ router.post('/registrar', (req, res) => {
                             html: `<h1>Hola ${nombre}</h1><p>Tu registro fue exitoso. Tu código es: <b>${codigoVerificacion}</b></p>`
                         }, (error) => {
                             if (error) console.error("Error al enviar correo:", error);
-                            res.sendFile(path.join(__dirname, 'inicio_sesion', 'Mensaje-exitoso.html'));
+                            res.redirect('/user/Mensaje-exitoso.html');
+                            //res.sendFile(path.join(__dirname, 'inicio_sesion', 'Mensaje-exitoso.html'));
                         });
                     });
                 });

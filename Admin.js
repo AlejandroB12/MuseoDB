@@ -29,7 +29,8 @@ router.post('/registrar-admin', (req, res) => {
                 
                 db.commit((err) => {
                     if (err) return db.rollback(() => res.status(500).send("Error al confirmar registro"));
-                    res.sendFile(path.join(__dirname, 'Administrador', 'Mensaje-exitoso.html'));
+                    res.redirect('/admin/Mensaje-exitoso.html');
+                    //res.sendFile(path.join(__dirname, 'admin', 'Mensaje-exitoso.html'));
                 });
             });
         });
@@ -42,9 +43,10 @@ router.post('/admin-auth', (req, res) => {
     db.query(sql, [username, password], (err, results) => {
         if (err) return res.status(500).send("Error en el servidor");
         if (results.length > 0) {
-            res.redirect('/Admin/Panel-adminsitrador.html');
+            res.redirect('/admin/Panel-adminsitrador.html');
         } else {
-            res.status(401).sendFile(path.join(__dirname, 'Admin', 'Credenciales-incorrectas-administrador.html'));
+            res.redirect('/admin/Credenciales-incorrectas-administrador.html');
+           //res.status(401).sendFile(path.join(__dirname, 'admin', 'Credenciales-incorrectas-administrador.html'));
         }
     });
 });
