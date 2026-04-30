@@ -105,7 +105,7 @@
                         <div style="font-weight:bold; color: #fff;">${user.Nombre} ${user.Apellido}</div>
                         <div style="color: #aaa;">Dirección: ${user.Calle}</div>
                         <div style="color: #aaa;">${user.Parroquia}, ${user.Municipio}</div>
-                        <a href="../Inicio_sesion/Perfil.html" style="font-size: 0.7rem; color: #00ff00; text-decoration: none;">Editar dirección</a>
+                        <a href="/views/user/Panel-usuario.html" style="font-size: 0.7rem; color: #00ff00; text-decoration: none;">Editar dirección</a>
                     `;
                 } else {
                     datosEnvio.innerHTML = `<div style="color: #ff4444;">Error al cargar datos de envío.</div>`;
@@ -147,7 +147,7 @@ document.getElementById('form-pago').addEventListener('submit', async (e) => {
         if (response.ok) {
             alert("¡Pago procesado y reserva guardada!");
             localStorage.removeItem('obraSeleccionada');
-            window.location.href = "../Inicio_sesion/Panel-usuario.html";
+            window.location.href = "/views/user/Panel-usuario.html";
         } else {
             alert("Error: " + (resultado.error || "No se pudo procesar el pago"));
             btnPagar.innerText = "PAGAR AHORA";

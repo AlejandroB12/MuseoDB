@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo | MUSEO CONTEMPORANEO</title>
-    <link rel="stylesheet" href="/styles/Estilo-inicio.css">
+    <link rel="stylesheet" href="/assets/styles/Estilo-inicio.css">
     <style>
         /* --- ESTILOS BASE --- */
             .btn-panel, .btn-logout {
@@ -228,7 +228,7 @@
 
     <div id="main-content">
            <nav class="navbar">
-            <a href="/public/Inicio.html" class="logo" style="text-decoration:none; font-weight:bold; letter-spacing:2px;"> ARTE CONTEMPORANEO</a>
+            <a href="/views/public/Inicio.html" class="logo" style="text-decoration:none; font-weight:bold; letter-spacing:2px;"> ARTE CONTEMPORANEO</a>
             
             <div class="nav-container">
                 <ul class="nav-links">
@@ -237,8 +237,8 @@
                 </ul>
 
                 <div class="auth-buttons" id="auth-buttons">
-                    <a href="/user/Login.html" class="btn-login" style="color:white; text-decoration:none; font-size:0.75rem;">INICIAR SESION</a>
-                    <a href="/user/Registro.html" class="btn-register" style="border:1px solid #00ff00; color:#00ff00; padding:8px 15px; text-decoration:none; font-size:0.75rem;">REGISTRARTE</a>
+                    <a href="/views/user/Login.html" class="btn-login" style="color:white; text-decoration:none; font-size:0.75rem;">INICIAR SESION</a>
+                    <a href="/views/user/Registro.html" class="btn-register" style="border:1px solid #00ff00; color:#00ff00; padding:8px 15px; text-decoration:none; font-size:0.75rem;">REGISTRARTE</a>
                 </div>
             </div>
         </nav>
@@ -425,8 +425,13 @@
                         // Añadimos el estilo al botón de Panel para que se vea profesional
                         userDiv.innerHTML = `
                     <span style="margin-right: 15px; color: #eee; font-size: 0.75rem;">HOLA, ${user.nombre}</span>
+<<<<<<< Updated upstream
                     <a href="/user/Panel-usuario.html" class="btn-panel">Panel de control</a>
                     <a href="/logout" class="btn-logout" text-decoration: none; font-size: 0.7rem; margin-left: 10px;">Cerrar sesión</a>
+=======
+                    <a href="/views/user/Panel-usuario.html" class="btn-panel">Panel de control</a>
+                    <a href="/logout" class="btn-logout" style="color: black; text-decoration: none; font-size: 0.7rem; margin-left: 10px;">Cerrar sesión</a>
+>>>>>>> Stashed changes
                 `;
                         navContainer.appendChild(userDiv);
                     });
