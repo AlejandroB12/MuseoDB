@@ -6,8 +6,8 @@
     <title>Nuestros Artistas | MUSEO CONTEMPORANEO</title>
     <link rel="stylesheet" href="/styles/Estilo-inicio.css">
     <style>
-        /* --- ESTILOS BASE --- */
-          .btn-panel, .btn-logout {
+         
+         .btn-panel, .btn-logout {
             text-decoration: none;
             padding: 5px 12px;
             font-size: 0.7rem;
@@ -35,17 +35,16 @@
 
         /* --- Variación ROJA (Cerrar Sesión) --- */
         .btn-logout {
-            color: #ff4444;
+            color: red;
             border: 1px solid #ff4444; /* Ahora tiene borde igual que el verde */
         }
 
         .btn-logout:hover {
             background: #ff4444;
-            color: #fff; /* Texto blanco para mejor lectura sobre rojo */
+            color: Black; /* Texto blanco para mejor lectura sobre rojo */
             box-shadow: 0 0 20px #ff4444;
             cursor: pointer;
         }
-
 
         body { padding-top: 100px; background: #050505; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; }
 
@@ -252,7 +251,7 @@
                         userDiv.innerHTML = `
                     <span style="margin-right: 15px; color: #eee; font-size: 0.75rem;">HOLA, ${user.nombre}</span>
                     <a href="/user/Panel-usuario.html" class="btn-panel">Panel de control</a>
-                    <a href="/logout" class="btn-logout" style="color: black; text-decoration: none; font-size: 0.7rem; margin-left: 10px;">Cerrar sesión</a>
+                    <a href="/logout" class="btn-logout" text-decoration: none; font-size: 0.7rem; margin-left: 10px;">Cerrar sesión</a>
                 `;
                         navContainer.appendChild(userDiv);
                     });
