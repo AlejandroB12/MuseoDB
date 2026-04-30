@@ -30,9 +30,9 @@ const app = express();
 
 
 // --- IMPORTAR RUTAS ---
-    const loginRoutes = require('./Login');
-    const catalogoRoutes = require('./Catalogo');
-    const adminRoutes = require('./Admin'); 
+    const loginRoutes = require('./routes/Login');
+    const catalogoRoutes = require('./routes/Catalogo');
+    const adminRoutes = require('./routes/Admin'); 
 
 
 
