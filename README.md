@@ -1,6 +1,16 @@
-![Texto alternativo]()
+<div align="center">
+  <img src="assets/images/museo_readme.png" alt="Museo Contemporáneo Banner" width="600" style="border-radius: 100px; border: 15px solid #30363d; max-width: 100%; height: auto; display: block; margin-bottom: 24px;">
 
-#  🏛️ Museo Contemporáneo - Sistema de Gestión
+  <h1>🏛️ Museo Contemporáneo</h1>
+  <p><i>Sistema Integral de Gestión de Obras, Autores y Suscripciones</i></p>
+
+  <p>
+    <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js">
+    <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express">
+    <img src="https://img.shields.io/badge/MySQL-00758F?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+    <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+  </p>
+</div>
 
 Este proyecto es una plataforma web integral diseñada para la administración de un **Museo Contemporáneo**. Permite gestionar el catálogo de obras de arte, organizar la información por autores y manejar un sistema de suscripciones para los usuarios.
 
@@ -92,4 +102,4 @@ Museo-Contemporaneo/
         ├── 🌐 Preguntas_codigo.html
         ├── 🌐 Registrar-envio.html
         ├── 🌐 Registro.html
-        └── 🌐 pago.html           
+        └── 🌐 pago.html       
