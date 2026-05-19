@@ -17,7 +17,7 @@ require('dotenv').config(); // Carga las variables de entorno.
         secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
-        cookie: { secure: true, maxAge: 60 * 60 * 1000 } // 1 hora
+        cookie: { secure: false}
     }));
 
 // --- REDIRECCIÓN INICIAL ---
