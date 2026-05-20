@@ -27,7 +27,6 @@ router.post('/login-auth', (req, res) => {
         
         if (results.length > 0) {
             const usuario = results[0];
-            req.session.id_usuario = usuario.id_usuario; 
 
             if (usuario.Estatus === 0) {
                 return res.sendFile(path.join(__dirname, '..', 'views', 'user', 'Cuenta-pendiente.html'));
@@ -50,6 +49,8 @@ router.post('/login-auth', (req, res) => {
                 } else if (usuario.Rol !== 'administrador') {
                     return res.send("<h1>Acceso Denegado</h1><p>No se encontró registro de pago.</p>");
                 }
+
+                req.session.id_usuario = usuario.id_usuario;
 
                 if (usuario.Rol === 'administrador') {
                     res.redirect('/Admin.html'); 
@@ -142,17 +143,7 @@ router.post('/registrar', (req, res) => {
 
                     db.commit((err) => {
                         if (err) return db.rollback(() => res.status(500).send("Error en Commit"));
-                        
-                        transporter.sendMail({
-                            from: '"Museo Virtual"',
-                            to: correo,
-                            subject: 'Tu Código Único',
-                            html: `<h1>Hola ${nombre}</h1><p>Tu registro fue exitoso. Tu código es: <b>${codigoVerificacion}</b></p>`
-                        }, (error) => {
-                            if (error) console.error("Error al enviar correo:", error);
-                            res.redirect('/user/Mensaje-exitoso.html');
-                            //res.sendFile(path.join(__dirname, 'inicio_sesion', 'Mensaje-exitoso.html'));
-                        });
+                        res.redirect('/user/Mensaje-exitoso.html');
                     });
                 });
             });
@@ -186,10 +177,10 @@ router.get('/api/parroquias/:id_municipio', (req, res) => {
 router.get('/api/usuario-actual', (req, res) => {
     if (!req.session.id_usuario) return res.status(401).json({ error: "No iniciado" });
     
-    const sql = "SELECT Nombre FROM Comprador WHERE id_usuario = ?";
+    const sql = "SELECT Nombre FROM Usuario WHERE id_usuario = ?";
     db.query(sql, [req.session.id_usuario], (err, results) => {
         if (err || results.length === 0) return res.status(500).json({ error: "Error" });
-        res.json({ nombre: results[0].Nombre });
+        res.json({ Nombre: results[0].Nombre });
     });
 });
 
